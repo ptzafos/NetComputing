@@ -4,6 +4,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.Naming;
+import java.rmi.RMISecurityManager;
+import java.rmi.RemoteException;
+import java.util.Date;
 
 /**
  * A server program which accepts requests from clients to
@@ -16,7 +20,7 @@ import java.net.Socket;
  * dependent.  If you ran it from a console window with the "java"
  * interpreter, Ctrl+C generally will shut it down.
  */
-public class Server {
+public class Server extends java.rmi.server.UnicastRemoteObject implements ServerRemote{
 
     /**
      * Application method to run the server runs in an infinite loop
@@ -26,10 +30,22 @@ public class Server {
      * client that connects just to show interesting logging
      * messages.  It is certainly not necessary to do this.
      */
+	public Server() throws RemoteException { }
+    // implement the ServerRemote interface
+	public Date getDate() throws RemoteException { 
+		return new Date();
+	}
     public static void main(String[] args) throws Exception {
+    	//System.setSecurityManager( new RMISecurityManager() );
         System.out.println("The capitalization server is running.");
         int clientNumber = 0;
         ServerSocket listener = new ServerSocket(9898);
+        try {
+        	ServerRemote server = new Server();
+        	Naming.rebind("Date", server); }
+        catch (java.io.IOException e) {
+        	// problem registering server
+        }
         try {
             while (true) {
                 new Capitalizer(listener.accept(), clientNumber++).start();

@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RMISecurityManager;
+import java.rmi.RemoteException;
+import java.util.Date;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -18,7 +23,7 @@ import javax.swing.JTextField;
  * strings and a textarea to see the results of capitalizing
  * them.
  */
-public class Client {
+public class Client extends java.rmi.server.UnicastRemoteObject implements ServerRemote{
 
     private BufferedReader in;
     private PrintWriter out;
@@ -31,8 +36,36 @@ public class Client {
      * listener with the textfield so that pressing Enter in the
      * listener sends the textfield contents to the server.
      */
-    public Client() {
-
+    /*public Client(String host) throws RemoteException{
+    	
+    	try {
+    		System.out.println("DEN MPAINW KAN !!!");
+            ServerRemote server = (ServerRemote) Naming.lookup("rmi://localhost/NiftyServer");
+            System.out.println("DEN MPAINW KAN !!!");
+            System.out.println( server.getDate() );
+            System.out.println("DEN MPAINW KAN !!!");
+        }
+    	catch (java.io.IOException e) {
+    		// I/O Error or bad URL
+        }
+    	catch (NotBoundException e) {
+    		//NiftyServer isn't registered
+    	}
+    }*/
+    public Client() throws RemoteException{
+    	try {
+    		System.out.println("DEN MPAINW 1");
+            ServerRemote server = (ServerRemote) Naming.lookup("rmi://localhost/Date");
+            System.out.println("DEN MPAINW 2");
+            System.out.println( server.getDate() );
+            System.out.println("DEN MPAINW 3");
+        }
+    	catch (java.io.IOException e) {
+    		// I/O Error or bad URL
+        }
+    	catch (NotBoundException e) {
+    		//NiftyServer isn't registered
+    	}
         // Layout GUI
         messageArea.setEditable(false);
         frame.getContentPane().add(dataField, "North");
@@ -97,10 +130,17 @@ public class Client {
      * Runs the client application.
      */
     public static void main(String[] args) throws Exception {
+    	//System.setSecurityManager( new RMISecurityManager() );
     	Client client = new Client();
+    	//new Client("localhost");
         client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         client.frame.pack();
         client.frame.setVisible(true);
         client.connectToServer();
     }
+	@Override
+	public Date getDate() throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

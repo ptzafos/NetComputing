@@ -1,4 +1,4 @@
-package com.javacodegeeks.spring.jms;
+package messagequeue;
 
 import javax.jms.JMSException;
 import javax.jms.Message;

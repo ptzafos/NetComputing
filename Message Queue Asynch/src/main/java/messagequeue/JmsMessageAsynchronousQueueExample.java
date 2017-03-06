@@ -1,4 +1,4 @@
-package com.javacodegeeks.spring.jms;
+package messagequeue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
