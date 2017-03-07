@@ -5,24 +5,31 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.URI;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Date;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Message;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-/**
- * A simple Swing-based client for the capitalization server.
- * It has a main frame window with a text field for entering
- * strings and a textarea to see the results of capitalizing
- * them.
- */
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.broker.BrokerFactory;
+import org.apache.activemq.broker.BrokerService;
+
 public class Client extends java.rmi.server.UnicastRemoteObject implements ServerRemote{
 
     private BufferedReader in;
@@ -31,34 +38,11 @@ public class Client extends java.rmi.server.UnicastRemoteObject implements Serve
     private JTextField dataField = new JTextField(40);
     private JTextArea messageArea = new JTextArea(8, 60);
 
-    /**
-     * Constructs the client by laying out the GUI and registering a
-     * listener with the textfield so that pressing Enter in the
-     * listener sends the textfield contents to the server.
-     */
-    /*public Client(String host) throws RemoteException{
-    	
-    	try {
-    		System.out.println("DEN MPAINW KAN !!!");
-            ServerRemote server = (ServerRemote) Naming.lookup("rmi://localhost/NiftyServer");
-            System.out.println("DEN MPAINW KAN !!!");
-            System.out.println( server.getDate() );
-            System.out.println("DEN MPAINW KAN !!!");
-        }
-    	catch (java.io.IOException e) {
-    		// I/O Error or bad URL
-        }
-    	catch (NotBoundException e) {
-    		//NiftyServer isn't registered
-    	}
-    }*/
     public Client() throws RemoteException{
     	try {
-    		System.out.println("DEN MPAINW 1");
-            ServerRemote server = (ServerRemote) Naming.lookup("rmi://localhost/Date");
-            System.out.println("DEN MPAINW 2");
+    		Registry registry = LocateRegistry.getRegistry(2002);
+            ServerRemote server = (ServerRemote) registry.lookup("Date");
             System.out.println( server.getDate() );
-            System.out.println("DEN MPAINW 3");
         }
     	catch (java.io.IOException e) {
     		// I/O Error or bad URL
@@ -73,14 +57,7 @@ public class Client extends java.rmi.server.UnicastRemoteObject implements Serve
 
         // Add Listeners
         dataField.addActionListener(new ActionListener() {
-            /**
-             * Responds to pressing the enter key in the textfield
-             * by sending the contents of the text field to the
-             * server and displaying the response from the server
-             * in the text area.  If the response is "." we exit
-             * the whole application, which closes all sockets,
-             * streams and windows.
-             */
+
             public void actionPerformed(ActionEvent e) {
                 out.println(dataField.getText());
                    String response;
@@ -98,13 +75,6 @@ public class Client extends java.rmi.server.UnicastRemoteObject implements Serve
         });
     }
 
-    /**
-     * Implements the connection logic by prompting the end user for
-     * the server's IP address, connecting, setting up streams, and
-     * consuming the welcome messages from the server.  The Capitalizer
-     * protocol says that the server sends three lines of text to the
-     * client immediately after establishing a connection.
-     */
     public void connectToServer() throws IOException {
 
         // Get the server address from a dialog box.
@@ -126,17 +96,27 @@ public class Client extends java.rmi.server.UnicastRemoteObject implements Serve
         }
     }
 
-    /**
-     * Runs the client application.
-     */
     public static void main(String[] args) throws Exception {
-    	//System.setSecurityManager( new RMISecurityManager() );
+		Connection connection = null;
+			// Producer
+			ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
+					"tcp://localhost:61616");
+			connection = connectionFactory.createConnection();
+			Session session = connection.createSession(false,
+					Session.AUTO_ACKNOWLEDGE);
+			Queue queue = session.createQueue("customerQueue");
+    	String payload = "Important Task";
+		Message msg = session.createTextMessage(payload);
+		MessageProducer producer = session.createProducer(queue);
+		System.out.println("Sending text '" + payload + "'");
+		producer.send(msg);
     	Client client = new Client();
-    	//new Client("localhost");
-        client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    	client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         client.frame.pack();
         client.frame.setVisible(true);
         client.connectToServer();
+        System.out.println("Sending text 2'" + payload + "'");
+		producer.send(msg);
     }
 	@Override
 	public Date getDate() throws RemoteException {
