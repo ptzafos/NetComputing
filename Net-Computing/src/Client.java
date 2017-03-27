@@ -34,10 +34,7 @@ public class Client extends java.rmi.server.UnicastRemoteObject implements Serve
 
     private BufferedReader in;
     private PrintWriter out;
-    private JFrame frame = new JFrame("Capitalize Client");
-    private JTextField dataField = new JTextField(40);
-    private JTextArea messageArea = new JTextArea(8, 60);
-
+    
     public Client() throws RemoteException{
     	try {
     		Registry registry = LocateRegistry.getRegistry(2002);
@@ -50,50 +47,6 @@ public class Client extends java.rmi.server.UnicastRemoteObject implements Serve
     	catch (NotBoundException e) {
     		//NiftyServer isn't registered
     	}
-        // Layout GUI
-        messageArea.setEditable(false);
-        frame.getContentPane().add(dataField, "North");
-        frame.getContentPane().add(new JScrollPane(messageArea), "Center");
-
-        // Add Listeners
-        dataField.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                out.println(dataField.getText());
-                   String response;
-                try {
-                    response = in.readLine();
-                    if (response == null || response.equals("")) {
-                          System.exit(0);
-                      }
-                } catch (IOException ex) {
-                       response = "Error: " + ex;
-                }
-                messageArea.append(response + "\n");
-                dataField.selectAll();
-            }
-        });
-    }
-
-    public void connectToServer() throws IOException {
-
-        // Get the server address from a dialog box.
-        String serverAddress = JOptionPane.showInputDialog(
-            frame,
-            "Enter IP Address of the Server:",
-            "Welcome to the Capitalization Program",
-            JOptionPane.QUESTION_MESSAGE);
-
-        // Make connection and initialize streams
-        Socket socket = new Socket(serverAddress, 9898);
-        in = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream(), true);
-
-        // Consume the initial welcoming messages from the server
-        for (int i = 0; i < 3; i++) {
-            messageArea.append(in.readLine() + "\n");
-        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -106,11 +59,8 @@ public class Client extends java.rmi.server.UnicastRemoteObject implements Serve
 					Session.AUTO_ACKNOWLEDGE);
 			Queue queue = session.createQueue("customerQueue");
     	Client client = new Client();
-    	/*client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        client.frame.pack();
-        client.frame.setVisible(true);
-        client.connectToServer();*/
         while(true){
+        	
         	String payload = "Important Task";
         	Message msg = session.createTextMessage(payload);
         	MessageProducer producer = session.createProducer(queue);

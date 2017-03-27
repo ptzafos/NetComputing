@@ -14,7 +14,7 @@ import javax.swing.JTextField;
 
 public class TaskManager {
 	
-	private BufferedReader in;
+	private static BufferedReader in;
     private PrintWriter out;
     private JFrame frame = new JFrame("Capitalize Client");
     private JTextField dataField = new JTextField(40);
@@ -46,15 +46,8 @@ public class TaskManager {
     }
 	public void connectToServer() throws IOException {
 
-        // Get the server address from a dialog box.
-        String serverAddress = JOptionPane.showInputDialog(
-            frame,
-            "Enter IP Address of the Server:",
-            "Welcome to the Capitalization Program",
-            JOptionPane.QUESTION_MESSAGE);
-
         // Make connection and initialize streams
-        Socket socket = new Socket(serverAddress, 9899);
+        Socket socket = new Socket("localhost", 9899);
         in = new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
