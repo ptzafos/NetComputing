@@ -52,7 +52,7 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
 		
         System.out.println("The capitalization server is running.");
         int clientNumber = 0;
-        ServerSocket listener = new ServerSocket(9898);
+        ServerSocket listener = new ServerSocket(9899);
         try {
         	LocateRegistry.createRegistry(2002);
             Registry registry = LocateRegistry.getRegistry(2002);       

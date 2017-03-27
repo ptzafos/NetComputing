@@ -105,22 +105,22 @@ public class Client extends java.rmi.server.UnicastRemoteObject implements Serve
 			Session session = connection.createSession(false,
 					Session.AUTO_ACKNOWLEDGE);
 			Queue queue = session.createQueue("customerQueue");
-    	String payload = "Important Task";
-		Message msg = session.createTextMessage(payload);
-		MessageProducer producer = session.createProducer(queue);
-		System.out.println("Sending text '" + payload + "'");
-		producer.send(msg);
     	Client client = new Client();
-    	client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    	/*client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         client.frame.pack();
         client.frame.setVisible(true);
-        client.connectToServer();
-        System.out.println("Sending text 2'" + payload + "'");
-		producer.send(msg);
+        client.connectToServer();*/
+        while(true){
+        	String payload = "Important Task";
+        	Message msg = session.createTextMessage(payload);
+        	MessageProducer producer = session.createProducer(queue);
+        	System.out.println("Sending text '" + payload + "'");
+        	producer.send(msg);
+        	Thread.sleep(1*60*1000);
+        }
     }
 	@Override
 	public Date getDate() throws RemoteException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }
