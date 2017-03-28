@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.Socket;
 import java.net.URI;
 import java.rmi.Naming;
@@ -20,6 +24,10 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -29,6 +37,11 @@ import javax.swing.JTextField;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerFactory;
 import org.apache.activemq.broker.BrokerService;
+import org.hyperic.sigar.CpuPerc;
+import org.hyperic.sigar.FileSystemUsage;
+import org.hyperic.sigar.Mem;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
 
 public class Client extends java.rmi.server.UnicastRemoteObject implements ServerRemote{
 
@@ -60,15 +73,31 @@ public class Client extends java.rmi.server.UnicastRemoteObject implements Serve
 			Queue queue = session.createQueue("customerQueue");
     	Client client = new Client();
         while(true){
-        	
+        	Mem mem = null;
+            CpuPerc cpuperc = null;
+            FileSystemUsage filesystemusage = null;
+            Sigar sigar = new Sigar();
+            try {
+                mem = sigar.getMem();
+                cpuperc = sigar.getCpuPerc();
+                filesystemusage = sigar.getFileSystemUsage("Macintosh");          
+            } catch (SigarException se) {
+                se.printStackTrace();
+            }
+
+
+            System.out.print(mem.getUsedPercent()+"\t");
+            System.out.print((cpuperc.getCombined()*100)+"\t");
+            System.out.print(filesystemusage.getUsePercent()+"\n");
         	String payload = "Important Task";
         	Message msg = session.createTextMessage(payload);
         	MessageProducer producer = session.createProducer(queue);
         	System.out.println("Sending text '" + payload + "'");
         	producer.send(msg);
-        	Thread.sleep(1*60*1000);
+        	Thread.sleep(1*5*1000);
         }
     }
+    
 	@Override
 	public Date getDate() throws RemoteException {
 		return null;
