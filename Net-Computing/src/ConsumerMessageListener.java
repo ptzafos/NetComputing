@@ -1,8 +1,11 @@
 
 
+import java.io.Serializable;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
 public class ConsumerMessageListener implements MessageListener {
@@ -12,10 +15,11 @@ public class ConsumerMessageListener implements MessageListener {
 	}
 
 	public void onMessage(Message message) {
-		TextMessage textMessage = (TextMessage) message;
+		ObjectMessage receivedobj = (ObjectMessage) message;
 		try {
-			System.out.println(consumerName + " received " + textMessage.getText());
-		} catch (JMSException e) {			
+			ReportObject ro = (ReportObject) receivedobj.getObject();
+			System.out.println(consumerName + " received "+ ro.getCpuusage());
+		} catch (JMSException e) {
 			e.printStackTrace();
 		}
 	}

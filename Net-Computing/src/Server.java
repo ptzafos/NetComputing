@@ -27,6 +27,9 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
 
 	public Server() throws RemoteException { }
     // implement the ServerRemote interface
+	public ReportObject ReportObject(float memoryusage, float cpuusage){
+		return new ReportObject(memoryusage,cpuusage);
+	}
 	public Date getDate() throws RemoteException { 
 		return new Date();
 	}
@@ -45,9 +48,6 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
 		consumer.setMessageListener(new ConsumerMessageListener("Consumer"));
 		connection.start();
 		Thread.sleep(1000);
-		Thread.sleep(1000);
-		Thread.sleep(1000);
-		Thread.sleep(1000);
 		//session.close();
 		
         System.out.println("The capitalization server is running.");
@@ -57,7 +57,9 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
         	LocateRegistry.createRegistry(2002);
             Registry registry = LocateRegistry.getRegistry(2002);       
         	ServerRemote server = new Server();
-        	registry.rebind("Date", server); }
+        	registry.rebind("Date", server);
+        	registry.rebind("ReportObject", server);
+        }
         catch (java.io.IOException e) {
         	// problem registering server
         }
@@ -69,7 +71,7 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
             listener.close();
         }
     }
-
+    
     private static class Capitalizer extends Thread {
         private Socket socket;
         private int clientNumber;
@@ -119,4 +121,9 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
             System.out.println(message);
         }
     }
+
+	@Override
+	public ReportObject ReportObjet(float memoryusage, float cpuusage) throws RemoteException {
+		return null;
+	}
 }
