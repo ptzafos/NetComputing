@@ -1,12 +1,7 @@
-
-
-import java.io.Serializable;
-
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
-import javax.jms.TextMessage;
 
 public class ConsumerMessageListener implements MessageListener {
 	private String consumerName;
