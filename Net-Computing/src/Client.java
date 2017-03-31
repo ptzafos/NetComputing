@@ -52,13 +52,13 @@ public  class Client extends java.rmi.server.UnicastRemoteObject implements Serv
             }
             float memoryusage = (float) mem.getUsedPercent();
             float cpuusage = (float) cpuperc.getCombined()*100;
-            
-            ReportObject ro = new ReportObject(memoryusage,cpuusage);
-        	ObjectMessage msg = session.createObjectMessage(ro);
-        	MessageProducer producer = session.createProducer(queue);
-
-        	producer.send(msg);
-        	Thread.sleep(1*5*1000);
+            if(cpuusage>30 ||memoryusage>50){
+            	ReportObject ro = new ReportObject(memoryusage,cpuusage);
+            	ObjectMessage msg = session.createObjectMessage(ro);
+            	MessageProducer producer = session.createProducer(queue);
+            	producer.send(msg);
+            	Thread.sleep(5000);
+            }
         }
     }
     
