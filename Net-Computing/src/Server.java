@@ -6,6 +6,9 @@ import java.net.Socket;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Date;
 
 import javax.jms.Connection;
@@ -19,7 +22,7 @@ import javax.jms.Session;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 public class Server extends java.rmi.server.UnicastRemoteObject implements ServerRemote{
-	
+	static java.sql.Connection sqlcon = null;
 	public Server() throws RemoteException { }
     // implement the ServerRemote interface
 	public ReportObject ReportObject(float memoryusage, float cpuusage,int clientID){
@@ -32,6 +35,9 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
     	
 		System.out.println("The server is running.");
 		System.out.println("Communication via message queue with task manager and via Sockets with Clients");
+		
+		System.out.println("Connecting database...");
+		sqlcon = connectionQuerry();
         int clientNumber = 0;
         ServerSocket listener = new ServerSocket(9899);
         try {
@@ -84,6 +90,12 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
                 	ReportObject or = (ReportObject) in.readObject();
                 	System.out.println("Received from client #"+or.getClientID() +" CPU usage:"+or.getCpuusage()+" memory usage:"+or.getMemoryusage());
                 	if(or.getCpuusage()>30 || or.getMemoryusage()>50){
+                		PreparedStatement st = sqlcon.prepareStatement("insert into performance values (?,?,?)");
+                		st.setInt(1,or.getClientID());
+                		st.setFloat(2,or.getCpuusage());
+                		st.setFloat(3,or.getMemoryusage());
+                		st.executeUpdate();
+                		
                 		System.err.println("Server sends to TM");
                 		ObjectMessage msg = session.createObjectMessage(or);
                     	MessageProducer producer = session.createProducer(queue);
@@ -92,7 +104,7 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
                 	Thread.sleep(1000);
                 }
             }
-            catch (IOException | InterruptedException | ClassNotFoundException | JMSException e) {
+            catch (IOException | InterruptedException | ClassNotFoundException | JMSException | SQLException e) {
                 log("Error handling client# " + clientNumber + ": " + e);
             } finally {
                 try {
@@ -109,7 +121,26 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
             System.out.println(message);
         }
     }
-
+    public static java.sql.Connection connectionQuerry() throws ClassNotFoundException
+	{
+    	String url = "jdbc:mysql://127.0.0.1:3306/client_performance?useSSL=false";
+    	java.sql.Connection sqlcon = null;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			sqlcon = DriverManager.getConnection(url, "root", "lk1995sf");
+			System.out.println("Remote DB connection established");
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+			System.out.println("Remote server could not be connected");
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Remote db connection establishment error");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("False querry");
+		}
+		return sqlcon;
+	}
 	@Override
 	public ReportObject ReportObjet(float memoryusage, float cpuusage,int clientID) throws RemoteException {
 		return null;
