@@ -1,10 +1,8 @@
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URI;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -13,54 +11,27 @@ import java.util.Date;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.Session;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.BrokerFactory;
-import org.apache.activemq.broker.BrokerService;
 
 public class Server extends java.rmi.server.UnicastRemoteObject implements ServerRemote{
-	static String msgfortm = null;
+	
 	public Server() throws RemoteException { }
     // implement the ServerRemote interface
-	public ReportObject ReportObject(float memoryusage, float cpuusage){
-		return new ReportObject(memoryusage,cpuusage);
+	public ReportObject ReportObject(float memoryusage, float cpuusage,int clientID){
+		return new ReportObject(memoryusage,cpuusage,clientID);
 	}
 	public Date getDate() throws RemoteException { 
 		return new Date();
 	}
     public static void main(String[] args) throws Exception {
-    	BrokerService broker = BrokerFactory.createBroker(new URI("broker:(tcp://localhost:61616)"));
-		broker.start();
-		Connection connection = null;
-		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-		connection = connectionFactory.createConnection();
-		Session session = connection.createSession(false,Session.AUTO_ACKNOWLEDGE);
-		Queue queue = session.createQueue("customerQueue");
-		MessageConsumer consumer = session.createConsumer(queue);
-		consumer.setMessageListener(new ConsumerMessageListener(){
-			public void onMessage(Message msg) {
-			      try {
-			    	  ObjectMessage receivedobj = (ObjectMessage) msg;
-			    	  ReportObject ro = (ReportObject) receivedobj.getObject();
-			    	  System.out.println("Server received from Client CPU usage:"+ro.getCpuusage()+"% and Memory usage: "+ro.getMemoryusage()+"%");
-			    	  if(ro.getCpuusage()>30 ||ro.getMemoryusage()>75){
-			    		  msgfortm = "Client is overworking !";
-			    		  System.err.println(msgfortm);
-			    	  }
-			      }
-			      catch (JMSException e) {
-			        System.err.println("Error reading message");
-			      }
-			    }
-		});
-		connection.start();
-		
+    	
 		System.out.println("The server is running.");
+		System.out.println("Communication via message queue with task manager and via Sockets with Clients");
         int clientNumber = 0;
         ServerSocket listener = new ServerSocket(9899);
         try {
@@ -88,33 +59,40 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
         public TMconnection(Socket socket, int clientNumber) {
             this.socket = socket;
             this.clientNumber = clientNumber;
-            log("New connection with task manager# " + clientNumber + " at " + socket);
+            log("New connection with client #" + clientNumber + " at " + socket);
         }
 
         public void run() {
             try {
-
+            	Connection connection = null;
+        		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        		connection = connectionFactory.createConnection();
+        		Session session = connection.createSession(false,Session.AUTO_ACKNOWLEDGE);
+        		Queue queue = session.createQueue("customerQueue");
+        		
                 // Decorate the streams so we can send characters
                 // and not just bytes.  Ensure output is flushed
                 // after every newline.
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-
+                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 // Send a welcome message to the client.
-                out.println("Hello, you are Task Manager #" + clientNumber + ".");
+                out.println("Client " + clientNumber + " connected to server successfully.");
 
                 // Get messages from the client, line by line; return them
                 // capitalized
                 while (true) {
-                	if(msgfortm != null){
+                	ReportObject or = (ReportObject) in.readObject();
+                	System.out.println("Received from client #"+or.getClientID() +" CPU usage:"+or.getCpuusage()+" memory usage:"+or.getMemoryusage());
+                	if(or.getCpuusage()>30 || or.getMemoryusage()>50){
                 		System.err.println("Server sends to TM");
-                		out.println(msgfortm);
-                		msgfortm = null;
+                		ObjectMessage msg = session.createObjectMessage(or);
+                    	MessageProducer producer = session.createProducer(queue);
+                    	producer.send(msg);
                 	}
                 	Thread.sleep(1000);
                 }
             }
-            catch (IOException | InterruptedException e) {
+            catch (IOException | InterruptedException | ClassNotFoundException | JMSException e) {
                 log("Error handling client# " + clientNumber + ": " + e);
             } finally {
                 try {
@@ -133,7 +111,7 @@ public class Server extends java.rmi.server.UnicastRemoteObject implements Serve
     }
 
 	@Override
-	public ReportObject ReportObjet(float memoryusage, float cpuusage) throws RemoteException {
+	public ReportObject ReportObjet(float memoryusage, float cpuusage,int clientID) throws RemoteException {
 		return null;
 	}
 }

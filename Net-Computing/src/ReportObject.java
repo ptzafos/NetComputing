@@ -3,10 +3,11 @@ import java.io.Serializable;
 public class ReportObject implements Serializable {
 	private float memoryusage;
     private float cpuusage;
-
-    public ReportObject(float memoryusage, float cpuusage) {
+    private int clientID;
+    public ReportObject(float memoryusage, float cpuusage,int clientID) {
         this.memoryusage = memoryusage;
         this.cpuusage = cpuusage;
+        this.clientID = clientID;
     }
 
 	public float getMemoryusage() {
@@ -15,5 +16,9 @@ public class ReportObject implements Serializable {
 
 	public float getCpuusage() {
 		return cpuusage;
+	}
+
+	public int getClientID() {
+		return clientID;
 	}
 }
