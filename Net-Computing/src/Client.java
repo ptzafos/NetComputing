@@ -45,17 +45,21 @@ public  class Client extends java.rmi.server.UnicastRemoteObject implements Serv
 	    client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    client.frame.pack();
 	    client.frame.setVisible(true);
+	    System.out.println("Ftanw5");
 	    Socket socket = new Socket("localhost", 9899);
+	    System.out.println("Ftanw4");
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         ObjectOutputStream outToServer = new ObjectOutputStream(socket.getOutputStream());
         // Consume the initial welcoming messages from the server
+        System.out.println("Ftanw");
         for (int i = 0; i < 1; i++) {
         	String sr = in.readLine();
         	String[] co = sr.split(" ");
             client.setClientID(Integer.parseInt(co[1]));
+            System.out.println("Ftanw2");
         	messageArea.append(sr +" "+client.date+"\n");
         }
-        
+        System.out.println("Ftanw3");
         while(true){
         	Mem mem = null;
             CpuPerc cpuperc = null;

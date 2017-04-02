@@ -37,7 +37,7 @@ public class TaskManager {
 			    	  ObjectMessage receivedobj = (ObjectMessage) msg;
 			    	  ReportObject ro = (ReportObject) receivedobj.getObject();
 			    	  System.out.println("Task Manager received from Server CPU usage:"+ro.getCpuusage()+"% and Memory usage: "+ro.getMemoryusage()+"%");
-			    	  if(ro.getCpuusage()>30 ||ro.getMemoryusage()>75){
+			    	  if(ro.getCpuusage()>30 ||ro.getMemoryusage()>50){
 			    		  messageArea.append("Client with ID:"+ro.getClientID()+" is overworking ! \n");
 			    	  }
 			      }
