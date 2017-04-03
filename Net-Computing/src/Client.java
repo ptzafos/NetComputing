@@ -49,8 +49,7 @@ public  class Client extends java.rmi.server.UnicastRemoteObject implements Serv
 	    Client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    Client.frame.pack();
 	    Client.frame.setVisible(true);
-	    String serverAddress = JOptionPane.showInputDialog(frame,"Enter IP Address of the Server:",
-	    "Welcome to the Capitalization Program",JOptionPane.QUESTION_MESSAGE);
+	    String serverAddress = JOptionPane.showInputDialog(frame,"Enter IP Address of the Server:",JOptionPane.QUESTION_MESSAGE);
 	    Socket socket = new Socket(serverAddress, 9899);
 
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));

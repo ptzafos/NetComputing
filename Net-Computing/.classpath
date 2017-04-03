@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="/Users/kar_lef/Downloads/apache-activemq-5.14.4/activemq-all-5.14.4.jar"/>
-	<classpathentry kind="lib" path="/Users/kar_lef/Downloads/hyperic-sigar-1.6.4/sigar-bin/lib/sigar.jar"/>
-	<classpathentry kind="lib" path="/Users/kar_lef/Downloads/mysql-connector-java-5.1.41/mysql-connector-java-5.1.41-bin.jar"/>
+	<classpathentry kind="lib" path="/Users/kar_lef/NetComputing/Net-Computing/apache-activemq-5.14.4/activemq-all-5.14.4.jar"/>
+	<classpathentry kind="lib" path="/Users/kar_lef/NetComputing/Net-Computing/hyperic-sigar-1.6.4/sigar-bin/lib/sigar.jar"/>
+	<classpathentry kind="lib" path="/Users/kar_lef/NetComputing/Net-Computing/mysql-connector-java-5.1.41/mysql-connector-java-5.1.41-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
